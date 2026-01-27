@@ -1,261 +1,206 @@
-# Mental Health Screening API
+# 🧠 Mental Health Screening API
 
-Hybrid architecture combining cloud-based Whisper speech-to-text with local DistilBERT mental health classification.
+A hybrid AI-powered mental health screening system that combines **Whisper speech-to-text** with **DistilBERT classification** for real-time mental health assessment.
 
-## Architecture
+![Demo](https://img.shields.io/badge/Demo-Live-brightgreen)
+![Node.js](https://img.shields.io/badge/Node.js-18+-green)
+![Python](https://img.shields.io/badge/Python-3.8+-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-```
-User Voice Input
-      ↓
-Whisper API (Hugging Face Cloud) → Transcript
-      ↓
-Local DistilBERT Classifier → Prediction
-      ↓
-Risk Analysis → Screening Report
-      ↓
-JSON Response (with chart data)
-```
-
-## Features
+## 🎯 Features
 
 - 🎤 **Speech-to-Text**: Whisper large-v3 via Hugging Face API
-- 🧠 **Mental Health Classification**: Local DistilBERT model (dsuram/distilbert-mentalhealth-classifier)
-- 📊 **Risk Assessment**: Automated risk level calculation (High/Moderate/Low)
-- 📈 **Chart-Ready Data**: Formatted for frontend visualization
-- 🔒 **Production-Ready**: Error handling, validation, and logging
+- 🧠 **Mental Health Classification**: Local DistilBERT model
+- 📊 **Risk Assessment**: Automated High/Moderate/Low risk calculation
+- 📈 **Visualization**: Chart.js integration for results
+- 🔒 **Privacy-First**: Audio processed in memory, not stored
+- ⚡ **Real-time**: Fast local classification (<1 second)
 
-## Prerequisites
+## 🏗️ Architecture
 
-1. **Node.js** (v18 or higher)
-2. **Hugging Face Account** with API token
-3. **Local FastAPI Classifier** running on `http://localhost:8000`
+```
+Audio Input → Whisper API → Transcript → Local DistilBERT → Risk Analysis → Results
+```
 
-## Setup
+**Hybrid Approach:**
+- **Cloud**: Whisper for accurate speech transcription
+- **Local**: DistilBERT for fast, private mental health classification
 
-### 1. Install Dependencies
+## 🚀 Quick Start
 
+### Prerequisites
+- Node.js 18+
+- Python 3.8+
+- Hugging Face API token
+
+### 1. Clone & Install
 ```bash
+git clone https://github.com/yourusername/mental-health-screening-api.git
+cd mental-health-screening-api
 npm install
+pip install -r requirements.txt
 ```
 
 ### 2. Configure Environment
-
-Create a `.env` file:
-
 ```bash
 cp .env.example .env
+# Edit .env and add your Hugging Face token
 ```
 
-Edit `.env` and add your Hugging Face token:
+### 3. Start Services
+```bash
+# Terminal 1: Start FastAPI classifier
+python classifier_server.py
 
+# Terminal 2: Start Node.js API
+npm start
+```
+
+### 4. Open Web Interface
+Open `enhanced-client.html` in your browser or visit:
+- API: `http://localhost:3000`
+- Classifier: `http://localhost:8000`
+
+## 📱 Usage
+
+### Web Interface
+1. **Text Analysis**: Type text directly
+2. **Audio Recording**: Record using microphone
+3. **File Upload**: Upload MP3/WAV files
+
+### API Endpoints
+
+**Text Analysis:**
+```bash
+curl -X POST http://localhost:3000/api/text-analysis \
+  -H "Content-Type: application/json" \
+  -d '{"text":"I feel anxious and stressed"}'
+```
+
+**Audio Analysis:**
+```bash
+curl -X POST http://localhost:3000/api/full-analysis \
+  -F "audio=@recording.mp3"
+```
+
+## 📊 Response Format
+
+```json
+{
+  "transcript": "I've been feeling anxious lately...",
+  "prediction": [
+    {"label": "Anxiety", "score": 0.95},
+    {"label": "Depression", "score": 0.03},
+    {"label": "Normal", "score": 0.02}
+  ],
+  "riskLevel": "High",
+  "report": "Mental Health Screening Report...",
+  "chartData": {
+    "labels": ["Anxiety", "Depression", "Normal"],
+    "scores": [95.0, 3.0, 2.0]
+  }
+}
+```
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| **Backend** | Node.js + Express |
+| **AI Classification** | Python + FastAPI + DistilBERT |
+| **Speech-to-Text** | Whisper (Hugging Face API) |
+| **Frontend** | HTML5 + JavaScript + Chart.js |
+| **Model** | `dsuram/distilbert-mentalhealth-classifier` |
+
+## 📁 Project Structure
+
+```
+├── server.js                 # Main Express server
+├── classifier_server.py      # FastAPI mental health classifier
+├── routes/analysis.js        # API endpoints
+├── services/
+│   ├── whisperService.js     # Whisper integration
+│   └── classifierService.js  # Classifier client
+├── utils/riskAnalysis.js     # Risk calculation
+├── enhanced-client.html      # Web interface
+└── docs/                     # Documentation
+```
+
+## 🔧 Configuration
+
+### Environment Variables
 ```env
-HF_TOKEN=hf_your_token_here
+HF_TOKEN=your_huggingface_token_here
 CLASSIFIER_URL=http://localhost:8000/predict
 PORT=3000
 NODE_ENV=development
 ```
 
-**Get your HF token**: https://huggingface.co/settings/tokens
-
-### 3. Start Local Classifier
-
-Ensure your FastAPI classifier is running:
-
-```bash
-# In your Python project directory
-uvicorn main:app --reload --port 8000
-```
-
-### 4. Start the API Server
-
-```bash
-npm start
-```
-
-Or with auto-reload during development:
-
-```bash
-npm run dev
-```
-
-## API Endpoints
-
-### Health Check
-
-```http
-GET /health
-```
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2026-01-26T10:30:00.000Z",
-  "services": {
-    "whisper": "Hugging Face Cloud API",
-    "classifier": "http://localhost:8000/predict"
-  }
-}
-```
-
-### Full Analysis
-
-```http
-POST /api/full-analysis
-Content-Type: multipart/form-data
-```
-
-**Request:**
-- Field name: `audio`
-- File types: `.mp3`, `.wav`, `.mp4`, `.webm`, `.ogg`, `.flac`
-- Max size: 25MB
-
-**Response:**
-```json
-{
-  "transcript": "I've been feeling really anxious lately and can't sleep well...",
-  "prediction": [
-    {
-      "label": "Anxiety",
-      "score": 0.95
-    },
-    {
-      "label": "Depression",
-      "score": 0.03
-    },
-    {
-      "label": "Normal",
-      "score": 0.02
-    }
-  ],
-  "riskLevel": "High",
-  "report": "Mental Health Screening Report\n\nPrimary Classification: Anxiety (95.0% confidence)...",
-  "chartData": {
-    "labels": ["Anxiety", "Depression", "Normal"],
-    "scores": [95.0, 3.0, 2.0]
-  },
-  "metadata": {
-    "audioFile": "recording.mp3",
-    "audioSize": 245678,
-    "transcriptLength": 156,
-    "timestamp": "2026-01-26T10:30:00.000Z"
-  }
-}
-```
-
-## Testing with cURL
-
-### Test with audio file:
-
-```bash
-curl -X POST http://localhost:3000/api/full-analysis \
-  -F "audio=@path/to/your/audio.mp3"
-```
-
-### Test with sample audio (if you have one):
-
-```bash
-curl -X POST http://localhost:3000/api/full-analysis \
-  -F "audio=@sample_audio.wav" \
-  -o response.json
-```
-
-## Testing with Postman
-
-1. Create a new POST request to `http://localhost:3000/api/full-analysis`
-2. Go to **Body** tab
-3. Select **form-data**
-4. Add key: `audio` (change type to **File**)
-5. Upload your audio file
-6. Click **Send**
-
-## Project Structure
-
-```
-.
-├── server.js                 # Express app entry point
-├── routes/
-│   └── analysis.js          # Main analysis route
-├── services/
-│   ├── whisperService.js    # Hugging Face Whisper integration
-│   └── classifierService.js # Local FastAPI classifier client
-├── utils/
-│   └── riskAnalysis.js      # Risk calculation and reporting
-├── middleware/
-│   └── errorHandler.js      # Global error handling
-├── package.json
-├── .env.example
-└── README.md
-```
-
-## Error Handling
-
-The API provides detailed error messages:
-
-- **400**: Invalid request (missing file, wrong format)
-- **413**: File too large (>25MB)
-- **500**: Configuration error (missing HF_TOKEN)
-- **503**: Service unavailable (classifier not running)
-
-## Risk Level Calculation
-
-- **High**: Depression/Anxiety with ≥75% confidence
-- **Moderate**: Depression/Anxiety with ≥50% confidence
+### Risk Level Calculation
+- **High**: Depression/Anxiety ≥75% confidence
+- **Moderate**: Depression/Anxiety ≥50% confidence  
 - **Low**: Normal classification or low confidence
 
-## Production Deployment
+## 🧪 Testing
 
-### Environment Variables
+```bash
+# Verify setup
+node verify-setup.js
 
-Set these in production:
+# Test API
+node test-api.js
 
-```env
-NODE_ENV=production
-HF_TOKEN=your_production_token
-CLASSIFIER_URL=http://your-classifier-service:8000/predict
-PORT=3000
+# Test complete system
+node test-complete-system.js
 ```
 
-### Security Considerations
+## 📚 Documentation
 
-1. Use HTTPS in production
-2. Implement rate limiting
-3. Add authentication/authorization
-4. Validate and sanitize all inputs
-5. Set up proper CORS policies
-6. Monitor API usage and costs
+- [Quick Start Guide](QUICK_START.md)
+- [Setup Instructions](SETUP.md)
+- [API Documentation](API_DOCUMENTATION.md)
+- [Architecture Overview](ARCHITECTURE.md)
 
-### Scaling
+## 🚀 Deployment
 
-- Consider caching Whisper results for identical audio
-- Implement request queuing for high traffic
-- Use load balancer for multiple classifier instances
-- Monitor Hugging Face API rate limits
+### Development
+```bash
+npm run dev  # Auto-reload
+```
 
-## Troubleshooting
+### Production
+```bash
+NODE_ENV=production npm start
+```
 
-### "Cannot connect to local classifier"
+## ⚠️ Disclaimer
 
-- Ensure FastAPI is running: `uvicorn main:app --reload --port 8000`
-- Check classifier URL in `.env`
-- Test classifier directly: `curl http://localhost:8000/predict -d '{"text":"test"}'`
+This is a **screening tool only** and not a clinical diagnosis. Always consult qualified mental health professionals for proper evaluation and treatment.
 
-### "Invalid Hugging Face API token"
+## 🤝 Contributing
 
-- Verify token in `.env` file
-- Check token permissions at https://huggingface.co/settings/tokens
-- Ensure token has read access
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-### "Whisper model is loading"
+## 📄 License
 
-- First request may take 30-60 seconds as model loads
-- Retry after a few moments
-- Consider using a dedicated inference endpoint for production
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## License
+## 🙏 Acknowledgments
 
-MIT
+- [Hugging Face](https://huggingface.co/) for Whisper API
+- [dsuram](https://huggingface.co/dsuram) for the DistilBERT mental health classifier
+- [OpenAI](https://openai.com/) for Whisper model
 
-## Disclaimer
+## 📞 Support
 
-This is a screening tool only and not a clinical diagnosis. Always consult qualified mental health professionals for proper evaluation and treatment.
+- 📧 Email: your.email@example.com
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/mental-health-screening-api/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/mental-health-screening-api/discussions)
+
+---
+
+**⭐ Star this repository if it helped you!**

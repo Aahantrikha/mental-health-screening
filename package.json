@@ -1,16 +1,41 @@
 {
   "name": "mental-health-screening-api",
   "version": "1.0.0",
-  "description": "Hybrid speech-to-text mental health screening API",
+  "description": "Hybrid AI-powered mental health screening system combining Whisper speech-to-text with DistilBERT classification",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node test-api.js",
+    "verify": "node verify-setup.js"
   },
-  "keywords": ["whisper", "mental-health", "speech-to-text", "distilbert"],
-  "author": "",
+  "keywords": [
+    "mental-health",
+    "ai",
+    "whisper",
+    "distilbert",
+    "speech-to-text",
+    "classification",
+    "healthcare",
+    "screening",
+    "nodejs",
+    "fastapi"
+  ],
+  "author": "Your Name <your.email@example.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/mental-health-screening-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/mental-health-screening-api/issues"
+  },
+  "homepage": "https://github.com/yourusername/mental-health-screening-api#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "@huggingface/inference": "^2.8.1",
     "express": "^4.21.2",
