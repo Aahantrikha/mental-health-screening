@@ -1,0 +1,22 @@
+{
+  "name": "mental-health-screening-api",
+  "version": "1.0.0",
+  "description": "Hybrid speech-to-text mental health screening API",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["whisper", "mental-health", "speech-to-text", "distilbert"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@huggingface/inference": "^2.8.1",
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "cors": "^2.8.5"
+  }
+}
