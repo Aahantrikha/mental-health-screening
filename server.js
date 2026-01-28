@@ -13,6 +13,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files (HTML clients)
+app.use(express.static('.'));
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ 

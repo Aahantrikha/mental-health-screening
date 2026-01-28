@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Mental Health Screening System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .status-card {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #10b981;
+        }
+
+        .status-card.error {
+            border-left-color: #ef4444;
+        }
+
+        .status-card h3 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        .status-indicator.error {
+            background: #ef4444;
+        }
+
+        .clients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .client-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .client-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .client-card h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .client-card p {
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .btn-api {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .features {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8fafc;
+            border-radius: 15px;
+        }
+
+        .features h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .api-endpoints {
+            margin-top: 30px;
+            padding: 25px;
+            background: #1f2937;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .api-endpoints h3 {
+            margin-bottom: 15px;
+            color: #f3f4f6;
+        }
+
+        .endpoint {
+            background: #374151;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .method {
+            color: #10b981;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Mental Health Screening System</h1>
+            <p>AI-Powered Mental Health Assessment with Real-time Analysis</p>
+        </div>
+
+        <div class="content">
+            <!-- System Status -->
+            <div class="status-grid">
+                <div class="status-card" id="nodeStatus">
+                    <h3>
+                        <span class="status-indicator" id="nodeIndicator"></span>
+                        Node.js API Server
+                    </h3>
+                    <p id="nodeStatusText">Checking...</p>
+                </div>
+                <div class="status-card" id="pythonStatus">
+                    <h3>
+                        <span class="status-indicator" id="pythonIndicator"></span>
+                        Python Classifier
+                    </h3>
+                    <p id="pythonStatusText">Checking...</p>
+                </div>
+            </div>
+
+            <!-- Client Applications -->
+            <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px;">Choose Your Interface</h2>
+            
+            <div class="clients-grid">
+                <div class="client-card">
+                    <h3>🎤 Real-time Transcription</h3>
+                    <p>Speak directly and see your words transcribed in real-time using Web Speech API. Perfect for live demonstrations and immediate feedback.</p>
+                    <a href="/realtime-client.html" class="btn" target="_blank">Launch Real-time Client</a>
+                </div>
+
+                <div class="client-card">
+                    <h3>🎯 Perfect Client</h3>
+                    <p>Hybrid interface with both voice and text input options. Includes fallback methods and enhanced error handling for maximum reliability.</p>
+                    <a href="/perfect-client.html" class="btn btn-secondary" target="_blank">Launch Perfect Client</a>
+                </div>
+
+                <div class="client-card">
+                    <h3>📝 Text Analysis</h3>
+                    <p>Direct text input for mental health analysis. Type your thoughts and get immediate classification results without audio processing.</p>
+                    <a href="#" class="btn btn-api" onclick="testTextAnalysis()">Test Text Analysis</a>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="features">
+                <h2>🚀 System Features</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">🎤</div>
+                        <h4>Speech Recognition</h4>
+                        <p>Advanced speech-to-text with multiple fallback options</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🧠</div>
+                        <h4>AI Classification</h4>
+                        <p>DistilBERT model for accurate mental health assessment</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📊</div>
+                        <h4>Risk Analysis</h4>
+                        <p>Automated risk level calculation with detailed reports</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔒</div>
+                        <h4>Privacy First</h4>
+                        <p>Local processing with no data storage or tracking</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Endpoints -->
+            <div class="api-endpoints">
+                <h3>🔗 API Endpoints</h3>
+                <div class="endpoint">
+                    <span class="method">GET</span> /health - System health check
+                </div>
+                <div class="endpoint">
+                    <span class="method">POST</span> /api/text-analysis - Direct text analysis
+                </div>
+                <div class="endpoint">
+                    <span class="method">POST</span> /api/full-analysis - Audio file analysis
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check system status
+        async function checkSystemStatus() {
+            try {
+                // Check Node.js API
+                const nodeResponse = await fetch('/health');
+                if (nodeResponse.ok) {
+                    document.getElementById('nodeIndicator').style.background = '#10b981';
+                    document.getElementById('nodeStatusText').textContent = 'Running on port 3000 ✅';
+                } else {
+                    throw new Error('Node.js API not responding');
+                }
+            } catch (error) {
+                document.getElementById('nodeStatus').classList.add('error');
+                document.getElementById('nodeIndicator').classList.add('error');
+                document.getElementById('nodeStatusText').textContent = 'Not running ❌';
+            }
+
+            try {
+                // Check Python Classifier
+                const pythonResponse = await fetch('http://localhost:8000/health');
+                if (pythonResponse.ok) {
+                    document.getElementById('pythonIndicator').style.background = '#10b981';
+                    document.getElementById('pythonStatusText').textContent = 'Model loaded and ready ✅';
+                } else {
+                    throw new Error('Python classifier not responding');
+                }
+            } catch (error) {
+                document.getElementById('pythonStatus').classList.add('error');
+                document.getElementById('pythonIndicator').classList.add('error');
+                document.getElementById('pythonStatusText').textContent = 'Not running ❌';
+            }
+        }
+
+        // Test text analysis
+        async function testTextAnalysis() {
+            const text = prompt('Enter text to analyze:', 'I feel anxious about my presentation');
+            if (!text) return;
+
+            try {
+                const response = await fetch('/api/text-analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Analysis Result:\n\nClassification: ${result.prediction[0].label}\nConfidence: ${(result.prediction[0].score * 100).toFixed(1)}%\nRisk Level: ${result.riskLevel}`);
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSystemStatus();
+            setInterval(checkSystemStatus, 30000); // Check every 30 seconds
+        });
+    </script>
+</body>
+</html>

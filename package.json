@@ -37,11 +37,11 @@
     "npm": ">=8.0.0"
   },
   "dependencies": {
-    "@huggingface/inference": "^2.8.1",
-    "express": "^4.21.2",
-    "multer": "^2.0.2",
+    "@huggingface/inference": "^4.13.10",
     "axios": "^1.7.9",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "cors": "^2.8.5"
+    "express": "^4.21.2",
+    "multer": "^2.0.2"
   }
 }

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindfulAI - Mental Health Screening</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #E8F5E9 0%, #E3F2FD 50%, #FFF9E6 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2C3E50;
+        }
+
+        .app-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .app-title {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4A90E2 0%, #6BCF7F 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .app-subtitle {
+            color: #5A6C7D;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .tabs-container {
+            display: flex;
+            background: #F8FAFB;
+            padding: 8px;
+            gap: 8px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #5A6C7D;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-button:hover {
+            background: rgba(74, 144, 226, 0.1);
+            color: #4A90E2;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #4A90E2;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .content-area {
+            padding: 32px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, #E3F2FD 0%, #E8F5E9 100%);
+            border-left: 4px solid #4A90E2;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            color: #2C3E50;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .input-container {
+            margin-bottom: 24px;
+        }
+
+        .text-area {
+            width: 100%;
+            min-height: 180px;
+            padding: 20px;
+            border: 2px solid #E8EAED;
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: #FAFBFC;
+            color: #2C3E50;
+            line-height: 1.6;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: #4A90E2;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        }
+
+        .text-area::placeholder {
+            color: #9CA3AF;
+        }
+
+        .voice-container {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .mic-button {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #4A90E2 0%, #6BCF7F 100%);
+            color: white;
+            font-size: 56px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3);
+            position: relative;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(74, 144, 226, 0.4);
+        }
+
+        .mic-button.listening {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
+            }
+            50% { 
+                transform: scale(1.08);
+                box-shadow: 0 12px 32px rgba(255, 107, 107, 0.5);
+            }
+        }
+
+        .voice-status {
+            margin-top: 24px;
+            font-size: 18px;
+            color: #5A6C7D;
+            font-weight: 600;
+        }
+
+        .transcript-box {
+            margin-top: 24px;
+            padding: 20px;
+            background: #F8FAFB;
+            border-radius: 16px;
+            text-align: left;
+            display: none;
+            border: 2px solid #E8EAED;
+        }
+
+        .transcript-box strong {
+            color: #4A90E2;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .transcript-box p {
+            color: #2C3E50;
+            line-height: 1.6;
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 18px 32px;
+            background: linear-gradient(135deg, #4A90E2 0%, #6BCF7F 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
+        }
+
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .examples-section {
+            margin-top: 24px;
+            padding: 20px;
+            background: #F8FAFB;
+            border-radius: 16px;
+        }
+
+        .examples-title {
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 16px;
+            font-size: 15px;
+        }
+
+        .example-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .example-button {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #E8EAED;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #5A6C7D;
+            transition: all 0.3s ease;
+        }
+
+        .example-button:hover {
+            border-color: #4A90E2;
+            color: #4A90E2;
+            background: #F0F7FF;
+        }
+
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 4px solid #E8EAED;
+            border-top: 4px solid #4A90E2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #5A6C7D;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .error-container {
+            display: none;
+            padding: 20px;
+            background: #FEE;
+            border-left: 4px solid #FF6B6B;
+            border-radius: 12px;
+            margin: 24px 0;
+            color: #C53030;
+        }
+
+        .results-container {
+            display: none;
+            margin-top: 32px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .results-header {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2C3E50;
+            margin-bottom: 24px;
+        }
+
+        .text-display-box {
+            padding: 20px;
+            background: #F8FAFB;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border-left: 4px solid #4A90E2;
+        }
+
+        .text-display-box strong {
+            color: #4A90E2;
+            display: block;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .text-display-box p {
+            color: #2C3E50;
+            line-height: 1.6;
+        }
+
+        .risk-section {
+            margin-bottom: 24px;
+        }
+
+        .risk-label {
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .risk-high {
+            background: linear-gradient(135deg, #FFE5E5 0%, #FFD6D6 100%);
+            color: #C53030;
+            border: 2px solid #FFC5C5;
+        }
+
+        .risk-moderate {
+            background: linear-gradient(135deg, #FFF4E5 0%, #FFE8CC 100%);
+            color: #D97706;
+            border: 2px solid #FFD699;
+        }
+
+        .risk-low {
+            background: linear-gradient(135deg, #E5F9F0 0%, #D1F4E0 100%);
+            color: #059669;
+            border: 2px solid #A7E9C5;
+        }
+
+        .chart-wrapper {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .report-box {
+            padding: 24px;
+            background: linear-gradient(135deg, #F8FAFB 0%, #F0F7FF 100%);
+            border-radius: 16px;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: #2C3E50;
+            border: 2px solid #E8EAED;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 20px;
+            }
+
+            .app-title {
+                font-size: 24px;
+            }
+
+            .mic-button {
+                width: 120px;
+                height: 120px;
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">🧠✨</div>
+            <h1 class="app-title">MindfulAI</h1>
+            <p class="app-subtitle">AI-Powered Mental Wellness Screening</p>
+        </div>
+
+        <div class="main-card">
+            <div class="tabs-container">
+                <button class="tab-button active" data-tab="text">
+                    <span>📝</span>
+                    <span>Type Text</span>
+                </button>
+                <button class="tab-button" data-tab="voice">
+                    <span>🎤</span>
+                    <span>Voice Input</span>
+                </button>
+            </div>
+
+            <div class="content-area">
+                <div class="tab-content active" id="text-tab">
+                    <div class="info-banner">
+                        ✨ Share your thoughts and feelings. Our AI will provide instant, confidential analysis to help understand your mental wellness.
+                    </div>
+
+                    <div class="input-container">
+                        <textarea class="text-area" id="textInput" placeholder="How are you feeling today? Share your thoughts, emotions, or what's on your mind...
+
+The more you share, the more accurate the analysis will be. Feel free to express yourself openly and honestly."></textarea>
+                    </div>
+
+                    <button class="action-button" id="analyzeTextBtn">
+                        Analyze My Text
+                    </button>
+
+                    <div class="examples-section">
+                        <div class="examples-title">💡 Try these examples to see how it works:</div>
+                        <div class="example-buttons">
+                            <button class="example-button" onclick="useExample(0)">Anxiety Example</button>
+                            <button class="example-button" onclick="useExample(1)">Depression Example</button>
+                            <button class="example-button" onclick="useExample(2)">Positive Mood</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="voice-tab">
+                    <div class="info-banner">
+                        🎤 Click the microphone and speak naturally. Your voice will be converted to text automatically using secure browser technology.
+                    </div>
+
+                    <div class="voice-container">
+                        <button class="mic-button" id="voiceBtn">🎤</button>
+                        <div class="voice-status" id="voiceStatus">Click to start speaking</div>
+                        <div class="transcript-box" id="transcriptPreview">
+                            <strong>📝 Your Speech:</strong>
+                            <p id="transcriptText"></p>
+                        </div>
+                    </div>
+
+                    <button class="action-button" id="analyzeVoiceBtn" disabled>
+                        Analyze My Speech
+                    </button>
+                </div>
+
+                <div class="loading-container" id="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Analyzing your input...</div>
+                </div>
+
+                <div class="error-container" id="error"></div>
+
+                <div class="results-container" id="results">
+                    <h2 class="results-header">📊 Your Analysis Results</h2>
+                    
+                    <div class="text-display-box" id="textBox">
+                        <strong>📝 Your Input:</strong>
+                        <p id="textDisplay"></p>
+                    </div>
+
+                    <div class="risk-section">
+                        <div class="risk-label">⚠️ Risk Assessment:</div>
+                        <div class="risk-badge" id="riskBadge"></div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <canvas id="predictionChart"></canvas>
+                    </div>
+
+                    <div class="report-box" id="report"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        
+        const examples = [
+            "I've been feeling really anxious lately. I can't sleep well and I'm constantly worrying about everything. My heart races and I feel overwhelmed by simple tasks.",
+            "I can't seem to get out of bed anymore. Everything feels hopeless and I have no energy. I don't enjoy the things I used to love and feel empty inside.",
+            "I'm feeling great today! I had a productive day at work, spent t

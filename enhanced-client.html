@@ -465,12 +465,31 @@
                     audioChunks.push(event.data);
                 };
 
-                mediaRecorder.onstop = () => {
-                    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                mediaRecorder.onstop = async () => {
+                    // Create blob with proper MIME type
+                    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+                        ? 'audio/webm;codecs=opus' 
+                        : 'audio/webm';
+                    
+                    recordedBlob = new Blob(audioChunks, { type: mimeType });
+                    
+                    // Validate blob size
+                    if (recordedBlob.size === 0) {
+                        showError('Recording failed: No audio data captured');
+                        return;
+                    }
+                    
+                    if (recordedBlob.size > 25 * 1024 * 1024) {
+                        showError('Recording too large. Please keep recordings under 25MB.');
+                        return;
+                    }
+                    
                     const audioUrl = URL.createObjectURL(recordedBlob);
                     audioPlayback.src = audioUrl;
                     audioPreview.style.display = 'block';
                     analyzeRecordingBtn.disabled = false;
+                    
+                    console.log(`✅ Recording complete: ${recordedBlob.size} bytes, type: ${recordedBlob.type}`);
                 };
 
                 mediaRecorder.start();
@@ -506,11 +525,22 @@
         }
 
         analyzeRecordingBtn.addEventListener('click', async () => {
-            if (!recordedBlob) return;
+            if (!recordedBlob) {
+                showError('No recording available. Please record audio first.');
+                return;
+            }
+
+            // Validate blob before sending
+            if (recordedBlob.size === 0) {
+                showError('Recording is empty. Please try recording again.');
+                return;
+            }
 
             const formData = new FormData();
-            formData.append('audio', recordedBlob, 'recording.webm');
+            // Append with explicit filename and MIME type
+            formData.append('audio', recordedBlob, `recording-${Date.now()}.webm`);
 
+            console.log(`🎤 Sending recording: ${recordedBlob.size} bytes, type: ${recordedBlob.type}`);
             await analyzeAudio(formData);
         });
 

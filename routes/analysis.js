@@ -6,14 +6,17 @@ import { calculateRiskLevel, generateReport, formatChartData } from '../utils/ri
 
 const router = express.Router();
 
-// Configure multer for audio file uploads
+// Configure multer for audio file uploads with better error handling
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
     fileSize: 25 * 1024 * 1024, // 25MB limit
+    files: 1, // Only one file at a time
   },
   fileFilter: (req, file, cb) => {
+    console.log(`📁 Received file: ${file.originalname}, type: ${file.mimetype}, size: ${file.size || 'unknown'}`);
+    
     const allowedMimes = [
       'audio/mpeg',
       'audio/wav',
@@ -21,13 +24,15 @@ const upload = multer({
       'audio/mp4',
       'audio/webm',
       'audio/ogg',
-      'audio/flac'
+      'audio/flac',
+      'audio/webm;codecs=opus'
     ];
     
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error(`Invalid file type. Allowed: ${allowedMimes.join(', ')}`));
+      console.log(`❌ Invalid file type: ${file.mimetype}`);
+      cb(new Error(`Invalid file type: ${file.mimetype}. Allowed: ${allowedMimes.join(', ')}`));
     }
   }
 });
@@ -99,16 +104,58 @@ router.post('/full-analysis', upload.single('audio'), async (req, res, next) => 
       });
     }
 
-    console.log(`📁 Received audio file: ${req.file.originalname} (${(req.file.size / 1024).toFixed(2)} KB)`);
+    // Validate file buffer
+    if (!req.file.buffer || req.file.buffer.length === 0) {
+      return res.status(400).json({
+        error: 'Empty audio file',
+        message: 'The uploaded audio file appears to be empty or corrupted.'
+      });
+    }
+
+    console.log(`📁 Processing audio file:`);
+    console.log(`   Name: ${req.file.originalname}`);
+    console.log(`   Size: ${(req.file.size / 1024).toFixed(2)} KB`);
+    console.log(`   Type: ${req.file.mimetype}`);
+    console.log(`   Buffer length: ${req.file.buffer.length} bytes`);
 
     // Step 1: Transcribe audio using Whisper (Hugging Face Cloud)
     console.log('🎤 Transcribing audio with Whisper...');
-    const transcript = await transcribeAudio(req.file.buffer);
+    
+    let transcript;
+    try {
+      transcript = await transcribeAudio(req.file.buffer);
+    } catch (transcriptionError) {
+      console.error('❌ Transcription failed:', transcriptionError.message);
+      
+      // Since Whisper API is currently unavailable, provide helpful guidance
+      return res.status(503).json({
+        error: 'Speech-to-text service unavailable',
+        message: 'The Whisper API is currently unavailable due to Hugging Face API changes. Please use one of these alternatives:',
+        alternatives: [
+          {
+            option: 'Real-time transcription',
+            description: 'Use the real-time client that transcribes as you speak',
+            url: '/realtime-client.html'
+          },
+          {
+            option: 'Perfect client',
+            description: 'Use the hybrid client with both voice and text input',
+            url: '/perfect-client.html'
+          },
+          {
+            option: 'Text input',
+            description: 'Type your text directly for analysis',
+            endpoint: '/api/text-analysis'
+          }
+        ],
+        technical_details: transcriptionError.message
+      });
+    }
     
     if (!transcript || transcript.trim().length === 0) {
       return res.status(400).json({
-        error: 'Transcription failed',
-        message: 'Could not extract text from audio. Please ensure audio contains speech.'
+        error: 'No speech detected',
+        message: 'Could not extract text from audio. Please ensure audio contains clear speech.'
       });
     }
 
@@ -137,6 +184,7 @@ router.post('/full-analysis', upload.single('audio'), async (req, res, next) => 
       metadata: {
         audioFile: req.file.originalname,
         audioSize: req.file.size,
+        audioType: req.file.mimetype,
         transcriptLength: transcript.length,
         timestamp: new Date().toISOString()
       }
@@ -146,6 +194,7 @@ router.post('/full-analysis', upload.single('audio'), async (req, res, next) => 
     res.json(response);
 
   } catch (error) {
+    console.error('❌ Full analysis error:', error);
     next(error);
   }
 });
