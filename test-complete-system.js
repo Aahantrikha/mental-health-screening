@@ -108,9 +108,9 @@ async function runAllTests() {
     if (passed === total) {
         console.log('🎉 All tests passed! System is production-ready!\n');
         console.log('✨ You can now use:');
-        console.log('   • enhanced-client.html (web interface)');
+        console.log('   • realtime-client.html (real-time transcription)');
+        console.log('   • perfect-client.html (hybrid voice + text)');
         console.log('   • POST /api/text-analysis (text input)');
-        console.log('   • POST /api/full-analysis (audio input)');
     } else {
         console.log('⚠️  Some tests failed. Please check the errors above.\n');
     }
